@@ -5,7 +5,8 @@
     <meta http-equiv="x-ua-compatible" content="IE=Edge">
     <meta name="viewport" content="width=device-width, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <script type="text/javascript" src="../enchant/build/enchant.js"></script>
+    <script type="text/javascript" src="./jquery.js"></script>
+    <script type="text/javascript" src="../enchant/build/enchant.js"></script>    
     <script type="text/javascript" src="../enchant/build/plugins/tl.enchant.js"></script>
     <script type="text/javascript" src="main.js"></script>
     <style type="text/css">
@@ -16,6 +17,24 @@
     </style>
 </head>
 <body>
+    <div id="enchant-stage"></div> <!-- ←これだけ!! -->
+  
+    FPS: 
+    <select id="fps">
+    <option value="60">60</option>
+    <option value="30">30</option>
+    <option value="20">20</option>
+    <option value="15">15</option>
+    <option value="10">10</option>            
+    </select>
+    <script type="text/javascript">
+    $("#fps").change( function() {
+        var str = "";
+        $("select option:selected").each(function () {
+          game.setFPS( parseInt( $(this).text() ) );
+      });
+    });      
+    </script>    
 </body>
 </html>
 

@@ -1,9 +1,30 @@
 enchant();
-window.onload = function() {
-    var game = new Game(320, 320);
-    game.enemy_speed = 1;
-    game.preload('chara1.png', 'map0.png');
+function rand(num){ return Math.floor(Math.random() * num) };
+function range(a,b) { return a + rand(b-a); }
 
+var scrw = 640;
+var scrh = 480;
+
+var game;
+
+
+
+window.onload = function() {
+    game = new Game(scrw, scrh);
+    game.enemy_speed = 1;
+    game.preload('chara1.png', 'map0.png', "enchant_pics.png");
+
+    game.setFPS = function(fps) {
+        game.fps = fps;
+        game.dt = 1.0 / fps; // TODO: 実測せよ
+    }
+    
+    game.setFPS(60);
+
+    game.gravity = 10;
+
+    game.rootScene.backgroundColor = '#ddd';
+        
     var Bear = enchant.Class.create(enchant.Sprite, {
         initialize: function(x, y) {
             enchant.Sprite.call(this, 32, 32);
@@ -36,14 +57,49 @@ window.onload = function() {
         }
     });
 
+    var PC = enchant.Class.create( enchant.Sprite, {
+        initialize: function(x,y) {
+            Bear.call(this,x,y);
+
+        }
+    });
     var Crystal  = enchant.Class.create( enchant.Sprite, {
+        initialize: function() {
+            enchant.Sprite.call(this,16,16);            
+            this.vy = range(-10,-5);
+            this.y = rand(scrh/2,scrh);
+            if( (rand(100) % 2) == 0 ) { // right
+                this.x = scrw;
+                this.vx = range(-5,-2);            
+            } else { // left
+                this.x = 0;
+                this.vx = range(2,5);                            
+            }
+
+            this.image = game.assets["enchant_pics.png"];
+            this.frame = range(64,66+1);
+
+            this.bonus = 1;
+            if( rand(100)%5==0) {
+                this.scale(2,2);
+                this.bonus *= 4;
+            }
+            this.addEventListener( 'enterframe', function() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vy += game.gravity * game.dt;
+            });
+            game.rootScene.addChild(this);            
+        }
         
     });
 
     game.onload = function() {
         game.rootScene.addEventListener('enterframe', function() {
-            if(this.age % 20 == 0){
-                var enemy = new Enemy(0, rand(320));
+            var k = game.input.up;
+            if(this.age % 10 == 0 || k ){
+                // var enemy = new Enemy(0, rand(320));
+                new Crystal();
             }
         });
     };
@@ -51,4 +107,4 @@ window.onload = function() {
     game.start();
 };
 
-function rand(num){ return Math.floor(Math.random() * num) };
+
