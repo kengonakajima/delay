@@ -77,6 +77,19 @@
     </script>
 
     <br>
+
+    自己表示:
+    <select id="showpc">
+    <option value="1">ON</option>
+    <option value="0">OFF</option>
+    </select>
+    <script type="text/javascript">
+    $("#showpc").change( function() {
+        $("#showpc option:selected").each(function () {
+          game.setShowPC( $(this).text() == "ON" );
+      });
+    });      
+    </script>
     
     ゴースト表示:
     <select id="ghost">
@@ -128,7 +141,10 @@
 
     <script type="text/javascript">    
       $("#enchant-stage").click( function(e) {
-      console.log( "xy:", e.clientX, e.clientY );
+          var parentOffset = $(this).offset(); 
+          var relX = e.pageX - parentOffset.left;
+          var relY = e.pageY - parentOffset.top;
+          game.clickAt( relX );
       });
     </script>    
 </body>

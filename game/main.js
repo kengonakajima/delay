@@ -21,6 +21,7 @@ Queue.prototype.size = function() { 	return this.__a.length; }
 
 var queue = new Queue();
 
+var pc_speed = 200;
 
 function DelayedEvent( name, fire_at ) {
     var e = {}
@@ -41,7 +42,6 @@ function checkGetCrystal( x, y, is_local ) {
                 game.mobs[i] = null;
                 c.parentNode.removeChild(c);
             } else {
-                console.log("X ", is_local, game.remote_bomb_hit );
                 var hit_bomb = false;
                 if( is_local ) hit_bomb = true; else if( game.remote_bomb_hit ) hit_bomb = true;
                 if( hit_bomb ) {
@@ -77,6 +77,8 @@ window.onload = function() {
     game.setSpikeDelay(0);
     game.setGhost = function(flg) {  game.show_ghost = flg; }
     game.setGhost(true);
+    game.setShowPC = function(flg) {  game.show_pc = flg; }
+    game.setShowPC(true);    
     game.setLocalHit = function(flg) { game.local_hit = flg; }
     game.setLocalHit(false);
     game.setRemoteBombHit = function(flg) { game.remote_bomb_hit = flg; }
@@ -118,12 +120,28 @@ window.onload = function() {
     var PC = enchant.Class.create( Bear, {
         initialize: function(x,y) {
             Bear.call(this,x,y);
+            this.goalX = null;
             this.vx = 0;
             this.setVX = function(vx) { this.vx = vx; }
+            this.setGoalX = function(x) { this.goalX = x; }
             this.addEventListener('enterframe', function() {
+                var prevx = this.x;
                 this.x += this.vx * game.dt;
                 if( this.x < 0 ) this.x = 0;
                 if( this.x > scrw-32 ) this.x = scrw-32;
+                if( this.goalX != null ) {
+                    if( (prevx < this.goalX && this.x >= this.goalX ) ||
+                        (prevx > this.goalX && this.x <= this.goalX ) ) {
+                        console.log("reached goal");
+                        this.vx = 0;
+                        this.x = this.goalX;
+                        this.goalX = null;
+                    } else if( this.x < this.goalX ) {
+                        this.vx = pc_speed;
+                    } else if( this.x > this.goalX ) {
+                        this.vx = -pc_speed;
+                    }
+                }
             });
         }
     });
@@ -204,8 +222,25 @@ window.onload = function() {
 
     game.sync = function() {
         game.ghost.x = game.pc.x;
-
     }
+
+    game.clickAt = function(x) {
+        var e = DelayedEvent( "goal", game.accum_time + game.nextDelay() );
+        e.x = x;
+        queue.enqueue(e);
+        console.log("clickat:",x);
+        game.pc.setGoalX(x-16);
+    }
+
+    game.nextDelay = function() {
+        var d = game.delay_min;
+        if( game.accum_time > game.spike_at ) {
+            d += game.delay_spike;
+            game.spike_at = game.accum_time + range(0.5,3);
+        }
+        return d;
+    }
+    
     game.onload = function() {
         game.pc = new PC( scrw/2, scrh-64 );
         game.ghost = new Ghost( scrw/2, scrh-64 );
@@ -220,21 +255,17 @@ window.onload = function() {
             }
 
             
-            var delay = game.delay_min;
-            if( game.accum_time > game.spike_at ) {
-                delay += game.delay_spike;
-                game.spike_at = game.accum_time + range(0.5,3);
-            }
+            var delay = game.nextDelay();
 
-            var base_vx = 200;
             if( game.input.right ) {
                 queue.enqueue( DelayedEvent( "right", game.accum_time + delay ) );
-                game.pc.setVX(base_vx);
+                game.pc.setVX(pc_speed);
             } else if( game.input.left) {
                 queue.enqueue( DelayedEvent( "left", game.accum_time + delay ) );
-                game.pc.setVX(-base_vx);                
+                game.pc.setVX(-pc_speed);                
             } else {
-                if( game.pc.vx != 0 ) {
+                if( game.pc.vx != 0 && game.pc.goalX == null ) {
+                    console.log("stop:", game.pc.vx );
                     queue.enqueue( DelayedEvent( "stop", game.accum_time + delay ) );
                     game.pc.setVX(0);
                 }
@@ -246,11 +277,13 @@ window.onload = function() {
             if( top != null && game.accum_time >= top.fire_at ) {
                 queue.dequeue();
                 if(top.name == "right") {
-                    game.ghost.setVX(base_vx);                    
+                    game.ghost.setVX(pc_speed);                    
                 } else if( top.name == "left" ) {
-                    game.ghost.setVX(-base_vx);
+                    game.ghost.setVX(-pc_speed);
                 } else if( top.name == "stop" ) {
                     game.ghost.setVX(0);
+                } else if( top.name == "goal" ) {
+                    game.ghost.setGoalX( top.x - 16 );
                 }
             }
 
@@ -258,6 +291,11 @@ window.onload = function() {
                 game.ghost.opacity = 0.2;
             } else {
                 game.ghost.opacity = 0;
+            }
+            if( game.show_pc ) {
+                game.pc.opacity = 1;
+            } else {
+                game.pc.opacity = 0;
             }
 
             // ローカルヒット
