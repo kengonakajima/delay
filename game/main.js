@@ -1,6 +1,7 @@
 enchant();
-function rand(num){ return Math.floor(Math.random() * num) };
+function rand(num){ return Math.random() * num };
 function range(a,b) { return a + rand(b-a); }
+function irange(a,b) { return Math.floor(a + rand(b-a) ); }
 
 var scrw = 640;
 var scrh = 480;
@@ -30,7 +31,7 @@ function DelayedEvent( name, fire_at ) {
 
 window.onload = function() {
     game = new Game(scrw, scrh);
-    game.enemy_speed = 1;
+
     game.preload('chara1.png', 'map0.png', "enchant_pics.png");
     game.preload("get1.wav", "get2.wav" );
 
@@ -39,10 +40,10 @@ window.onload = function() {
         game.fps = fps;
         game.dt = 1.0 / fps; // TODO: 実測せよ
     }
-    game.setMinDelay = function(d) {
-        game.delay_min = d;
-    }
+    game.setMinDelay = function(d) {        game.delay_min = d;     }
     game.setMinDelay(0);
+    game.setSpikeDelay = function(d) {        game.delay_spike = d; }
+    game.setSpikeDelay(0);
     
     game.setFPS(60);
 
@@ -51,6 +52,8 @@ window.onload = function() {
     game.rootScene.backgroundColor = '#ddd';
 
     game.score = 0;
+
+    game.spike_at = 0;
     
     var Bear = enchant.Class.create(enchant.Sprite, {
         initialize: function(x, y) {
@@ -63,15 +66,6 @@ window.onload = function() {
         }
     });
 
-    var Enemy = enchant.Class.create(Bear, {
-        initialize: function(x, y) {
-            Bear.call(this, x, y);
-            this.addEventListener('enterframe', function() {
-                this.x += game.enemy_speed;
-                this.frame = [0, 1, 0, 2][Math.floor(this.age/5) % 4] + 5;
-            });
-        }
-    });
 
     var Treasure = enchant.Class.create(enchant.Sprite, {
         initialize: function(x, y) {
@@ -91,6 +85,8 @@ window.onload = function() {
             this.setVX = function(vx) { this.vx = vx; }
             this.addEventListener('enterframe', function() {
                 this.x += this.vx * game.dt;
+                if( this.x < 0 ) this.x = 0;
+                if( this.x > scrw-32 ) this.x = scrw-32;
                 for(var i=0;i<game.n_crystals;i++){
                     var c = game.crystals[i];
                     if( c && c.x >= this.x - c.hitsize && c.x <= this.x + c.hitsize &&
@@ -117,7 +113,7 @@ window.onload = function() {
             this.vy = range(-100,-5);
             this.y = rand(scrh/2,scrh);
             this.vx = range(40,200);                            
-            if( (rand(100) % 2) == 0 ) { // right
+            if( (irange(0,100) % 2) == 0 ) { // right
                 this.x = scrw;
                 this.vx *= -1;
             } else { // left
@@ -125,11 +121,11 @@ window.onload = function() {
             }
 
             this.image = game.assets["enchant_pics.png"];
-            this.frame = range(64,66+1);
+            this.frame = irange(64,66+1);
 
             this.bonus = 1;
             this.hitsize = 16;
-            if( rand(100)%5==0) {
+            if( irange(0,100)%5==0) {
                 this.scale(2,2);
                 this.bonus *= 20;
                 this.hitsize = 32;
@@ -178,7 +174,12 @@ window.onload = function() {
                 new Crystal();
             }
 
+            
             var delay = game.delay_min;
+            if( game.accum_time > game.spike_at ) {
+                delay += game.delay_spike;
+                game.spike_at = game.accum_time + range(0.5,3);
+            }
 
             if( game.input.right ) {
                 queue.enqueue( DelayedEvent( "right", game.accum_time + delay ) );

@@ -57,6 +57,24 @@
     });      
     </script>
 
+    スパイク遅延:
+    <select id="delay_spike">
+    <option value="0">0ms(ローカル)</option>
+    <option value="100">100ms(混んでるwifi)</option>
+    <option value="200">200ms</option>
+    <option value="500">500ms(電波がいいモバイル)</option>
+    <option value="1000">1000ms</option>
+    <option value="2000">2000ms</option>        
+    <option value="3000">3000ms</option>            
+    </select>
+    <script type="text/javascript">
+    $("#delay_spike").change( function() {
+        $("select option:selected").each(function () {
+          game.setSpikeDelay( parseInt( $(this).text() ) / 1000.0 );
+      });
+    });      
+    </script>    
+
 
 </body>
 </html>
