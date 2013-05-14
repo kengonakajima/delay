@@ -29,19 +29,26 @@ function DelayedEvent( name, fire_at ) {
     return e;
 }
 
-function checkGetCrystal( x, y ) {
+function checkGetCrystal( x, y, is_local ) {
     for(var i=0;i<game.mobs.length;i++){
         var c = game.mobs[i];
         if( c && c.x >= x - c.hitsize && c.x <= x + 8 + c.hitsize &&
             c.y >= y - c.hitsize && c.y <= y + 16 + c.hitsize ) {
-            game.mobs[i] = null;
-            c.parentNode.removeChild(c);
+            
             if( c.bonus > 0 ) {
                 game.score += c.bonus;
                 c.playBonusSound();
+                game.mobs[i] = null;
+                c.parentNode.removeChild(c);
             } else {
-                game.assets['explode.wav'].play();                
-                game.score = 0;
+                var hit_bomb = false;
+                if( is_local ) hit_bomb = true; else if( game.remote_bomb_hit ) hit_bomb = true;
+                if( hit_bomb ) {
+                    game.assets['explode.wav'].play();                
+                    game.score = 0;
+                    game.mobs[i] = null;
+                    c.parentNode.removeChild(c);
+                }
              }
             $("#score").text("SCORE: " + game.score );            
             break;
@@ -71,6 +78,9 @@ window.onload = function() {
     game.setGhost(true);
     game.setLocalHit = function(flg) { game.local_hit = flg; }
     game.setLocalHit(false);
+    game.setRemoteBombHit = function(flg) { game.remote_bomb_hit = flg; }
+    game.setRemoteBombHit(false);
+    
     game.setFPS(60);
 
     game.gravity = 50;
@@ -123,7 +133,7 @@ window.onload = function() {
             this.opacity = 0.2;
 
             this.addEventListener('enterframe', function() {
-                checkGetCrystal( this.x, this.y );
+                checkGetCrystal( this.x, this.y, false );
             });
         }
     });
@@ -153,9 +163,9 @@ window.onload = function() {
                 this.scale(2,2);
                 this.bonus *= 20;
                 this.hitsize = 32;
-            }
-            if( irange(0,100)%11 == 0  ) { // 爆弾
-                this.hitsize /= 2;
+            } else if( irange(0,100)%3 == 0  ) { // 爆弾 bomb
+                this.scale(2,2);
+                this.hitsize = 16; // 小さめ
                 this.bonus = -1;
                 this.frame = 16+9;
             }
@@ -203,7 +213,7 @@ window.onload = function() {
             game.accum_time += game.dt;
             
             var k = game.input.up;
-            if(game.accum_time > game.last_crystal + 0.2 ){
+            if(game.accum_time > game.last_crystal + 0.15 ){
                 game.last_crystal = game.accum_time;
                 new Crystal();
             }
@@ -251,7 +261,7 @@ window.onload = function() {
 
             // ローカルヒット
             if( game.local_hit ) {
-                checkGetCrystal( game.pc.x, game.pc.y );
+                checkGetCrystal( game.pc.x, game.pc.y, true );
             }
 
             

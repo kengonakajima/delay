@@ -48,6 +48,7 @@
     <option value="200">200ms(東京-東京 3G)</option>
     <option value="300">300ms(東京-London)</option>
     <option value="500">500ms(東京-東欧ロシア)</option>
+    <option value="1000">1000ms</option>    
     </select>
     <script type="text/javascript">
     $("#delay_min").change( function() {
@@ -102,6 +103,19 @@
         });    
     });      
     </script>
+
+    リモート爆弾判定:
+    <select id="remotebomb">
+    <option value="1">ON</option>      
+    <option value="0">OFF</option>
+    </select>
+    <script type="text/javascript">
+    $("#remotebomb").change( function() {
+        $("#remotebomb option:selected").each(function () {
+          game.setRemoteBombHit( $(this).text() == "ON" );
+        });    
+    });      
+    </script>    
 
     
     <br><br>
