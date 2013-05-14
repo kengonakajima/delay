@@ -83,7 +83,8 @@ window.onload = function() {
     game.setLocalHit(false);
     game.setRemoteBombHit = function(flg) { game.remote_bomb_hit = flg; }
     game.setRemoteBombHit(true);
-    
+    game.setAutoSync = function(flg) { game.auto_sync = flg; }
+    game.setAutoSync(true);
     game.setFPS(60);
 
     game.gravity = 50;
@@ -219,9 +220,7 @@ window.onload = function() {
         
     });
 
-    game.sync = function() {
-        game.ghost.x = game.pc.x;
-    }
+
 
     game.clickAt = function(x) {
         var e = DelayedEvent( "goal", game.accum_time + game.nextDelay() );
@@ -297,7 +296,10 @@ window.onload = function() {
                 } else if( top.name == "stop" ) {
                     game.ghost.setVX(0);
                 } else if( top.name == "goal" ) {
+                    console.log("recv goal x:", top.x );
                     game.ghost.setGoalX( top.x - 16 );
+                } else if( top.name == "direct" ) {
+                    game.ghost.x = top.x;
                 }
             }
 
@@ -317,7 +319,15 @@ window.onload = function() {
                 checkGetCrystal( game.pc.x, game.pc.y, true );
             }
 
-            
+            if( game.auto_sync ) {
+                if( game.last_auto_sync_at == null ||
+                    game.last_auto_sync_at < game.accum_time - 1 ) {
+                    game.last_auto_sync_at = game.accum_time;
+                    var e = DelayedEvent( "direct", game.accum_time + game.nextDelay() );
+                    e.x = game.pc.x;
+                    queue.enqueue(e);
+                }
+            }
         });
     };
 

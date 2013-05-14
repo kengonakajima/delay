@@ -130,14 +130,21 @@
     });      
     </script>    
 
+    <br>
     
-    <br><br>
-    <input type="button" id="sync" value="ゴーストの座標を同期する">
+    自動同期:
+    <select id="autosync">
+    <option value="1">ON</option>      
+    <option value="0">OFF</option>
+    </select>
     <script type="text/javascript">
-    $("#sync").click( function() {
-        game.sync();
+    $("#autosync").change( function() {
+        $("#autosync option:selected").each(function () {
+          game.setAutoSync( $(this).text() == "ON" );
+        });    
     });      
-    </script>
+    </script>    
+
 
     <script type="text/javascript">    
       $("#enchant-stage").click( function(e) {
