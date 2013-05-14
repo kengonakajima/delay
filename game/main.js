@@ -132,7 +132,6 @@ window.onload = function() {
                 if( this.goalX != null ) {
                     if( (prevx < this.goalX && this.x >= this.goalX ) ||
                         (prevx > this.goalX && this.x <= this.goalX ) ) {
-                        console.log("reached goal");
                         this.vx = 0;
                         this.x = this.goalX;
                         this.goalX = null;
@@ -228,7 +227,6 @@ window.onload = function() {
         var e = DelayedEvent( "goal", game.accum_time + game.nextDelay() );
         e.x = x;
         queue.enqueue(e);
-        console.log("clickat:",x);
         game.pc.setGoalX(x-16);
     }
 
@@ -273,7 +271,6 @@ window.onload = function() {
                 game.pc.setVX(-pc_speed);                
             } else {
                 if( game.pc.vx != 0 && game.pc.goalX == null ) {
-                    console.log("stop:", game.pc.vx );
                     queue.enqueue( DelayedEvent( "stop", game.accum_time + delay ) );
                     game.pc.setVX(0);
                 }
