@@ -30,11 +30,11 @@ function DelayedEvent( name, fire_at ) {
 }
 
 function checkGetCrystal( x, y ) {
-    for(var i=0;i<game.n_crystals;i++){
-        var c = game.crystals[i];
-        if( c && c.x >= x - c.hitsize && c.x <= x + c.hitsize &&
-            c.y >= y - c.hitsize && c.y <= y + c.hitsize ) {
-            game.crystals[i] = null;
+    for(var i=0;i<game.mobs.length;i++){
+        var c = game.mobs[i];
+        if( c && c.x >= x - c.hitsize && c.x <= x + 8 + c.hitsize &&
+            c.y >= y - c.hitsize && c.y <= y + 16 + c.hitsize ) {
+            game.mobs[i] = null;
             c.parentNode.removeChild(c);
             game.score += c.bonus;
             c.playBonusSound();
@@ -52,6 +52,7 @@ window.onload = function() {
     game.preload('chara1.png', 'map0.png', "enchant_pics.png");
     game.preload("get1.wav", "get2.wav" );
 
+    game.mobs = new Array(200);
     
     game.setFPS = function(fps) {
         game.fps = fps;
@@ -122,10 +123,8 @@ window.onload = function() {
         }
     });
     
-
     
-    game.n_crystals = 200;
-    game.crystals = new Array(game.n_crystals);
+
     var Crystal  = enchant.Class.create( enchant.Sprite, {
         initialize: function() {
             enchant.Sprite.call(this,16,16);            
@@ -161,18 +160,18 @@ window.onload = function() {
                 this.y += this.vy * game.dt;
                 this.vy += game.gravity * game.dt;
                 if( this.y > scrh ) {
-                    for(var i=0;i<game.n_crystals;i++){
-                        if( game.crystals[i] == this ) {
-                            game.crystals[i] = null;
+                    for(var i=0;i<game.mobs.length;i++){
+                        if( game.mobs[i] == this ) {
+                            game.mobs[i] = null;
                             break;
                         }
                     }
                     this.parentNode.removeChild(this);
                 }
             });
-            for(var i=0;i< game.n_crystals; i++ ) {
-                if( game.crystals[i] == null ){
-                    game.crystals[i] = this;
+            for(var i=0;i< game.mobs.length; i++ ) {
+                if( game.mobs[i] == null ){
+                    game.mobs[i] = this;
                     break;
                 }
             }
