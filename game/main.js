@@ -45,6 +45,7 @@ window.onload = function() {
     game.setSpikeDelay = function(d) {        game.delay_spike = d; }
     game.setSpikeDelay(0);
     game.setGhost = function(flg) {  game.show_ghost = flg; }
+    game.setGhost(true);
     game.setFPS(60);
 
     game.gravity = 50;
@@ -173,6 +174,10 @@ window.onload = function() {
         
     });
 
+    game.sync = function() {
+        game.ghost.x = game.pc.x;
+
+    }
     game.onload = function() {
         game.pc = new PC( scrw/2, scrh-64 );
         game.ghost = new Ghost( scrw/2, scrh-64 );
@@ -220,7 +225,12 @@ window.onload = function() {
                     game.ghost.setVX(0);
                 }
             }
-            
+
+            if( game.show_ghost ) {
+                game.ghost.opacity = 0.2;
+            } else {
+                game.ghost.opacity = 0;
+            }
         });
     };
 

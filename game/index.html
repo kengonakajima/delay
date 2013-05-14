@@ -78,18 +78,24 @@
     <br>
     
     ゴースト表示:
-    <select id="delay_spike">
+    <select id="ghost">
     <option value="1">ON</option>
     <option value="0">OFF</option>
     </select>
     <script type="text/javascript">
     $("#ghost").change( function() {
         $("#ghost option:selected").each(function () {
-          game.setGhost( parseInt( $(this).text() ) );
+          game.setGhost( $(this).text() == "ON" );
       });
     });      
     </script>
-
+    <br>
+    <input type="button" id="sync" value="ゴーストの座標を同期する">
+    <script type="text/javascript">
+    $("#sync").click( function() {
+        game.sync();
+    });      
+    </script>    
 </body>
 </html>
 
