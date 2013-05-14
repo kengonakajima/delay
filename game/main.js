@@ -41,6 +41,7 @@ function checkGetCrystal( x, y, is_local ) {
                 game.mobs[i] = null;
                 c.parentNode.removeChild(c);
             } else {
+                console.log("X ", is_local, game.remote_bomb_hit );
                 var hit_bomb = false;
                 if( is_local ) hit_bomb = true; else if( game.remote_bomb_hit ) hit_bomb = true;
                 if( hit_bomb ) {
@@ -79,7 +80,7 @@ window.onload = function() {
     game.setLocalHit = function(flg) { game.local_hit = flg; }
     game.setLocalHit(false);
     game.setRemoteBombHit = function(flg) { game.remote_bomb_hit = flg; }
-    game.setRemoteBombHit(false);
+    game.setRemoteBombHit(true);
     
     game.setFPS(60);
 
@@ -270,4 +271,5 @@ window.onload = function() {
 
     game.start();
 };
+
 
