@@ -8,20 +8,41 @@ var scrh = 480;
 var game;
 
 // イベントキュー
-var evqueue = new Array(1000);  // FIFOでいくらでも積める。時刻が来ていたら発行される
+function Queue() { this.__a = new Array();}
+Queue.prototype.enqueue = function(o) { this.__a.push(o); }
+Queue.prototype.dequeue = function() {
+	if( this.__a.length > 0 ) { 	return this.__a.shift(); }
+	return null;
+}
+Queue.prototype.peek = function(ind) { return this.__a[ind]; }
+Queue.prototype.size = function() { 	return this.__a.length; } 
 
-//function Queue( )
+
+var queue = new Queue();
+
+
+function DelayedEvent( name, fire_at ) {
+    var e = {}
+    e.name = name;
+    e.fire_at = fire_at;
+    return e;
+}
 
 window.onload = function() {
     game = new Game(scrw, scrh);
     game.enemy_speed = 1;
     game.preload('chara1.png', 'map0.png', "enchant_pics.png");
     game.preload("get1.wav", "get2.wav" );
+
     
     game.setFPS = function(fps) {
         game.fps = fps;
         game.dt = 1.0 / fps; // TODO: 実測せよ
     }
+    game.setMinDelay = function(d) {
+        game.delay_min = d;
+    }
+    game.setMinDelay(0);
     
     game.setFPS(60);
 
@@ -157,14 +178,32 @@ window.onload = function() {
                 new Crystal();
             }
 
-//            console.log( "rl:", game.input.right, game.input.left );
+            var delay = game.delay_min;
+
             if( game.input.right ) {
-                game.pc.setVX(200);
+                queue.enqueue( DelayedEvent( "right", game.accum_time + delay ) );
             } else if( game.input.left) {
-                game.pc.setVX(-200);
+                queue.enqueue( DelayedEvent( "left", game.accum_time + delay ) );
             } else {
-                game.pc.setVX(0);
+                if( game.pc.vx != 0 ) {
+                    queue.enqueue( DelayedEvent( "stop", game.accum_time + delay ) );
+                }
             }
+
+
+            // イベント消化
+            var top = queue.peek(0);
+            if( top != null && game.accum_time >= top.fire_at ) {
+                queue.dequeue();
+                if(top.name == "right") {
+                    game.pc.setVX(200);                    
+                } else if( top.name == "left" ) {
+                    game.pc.setVX(-200);
+                } else if( top.name == "stop" ) {
+                    game.pc.setVX(0);
+                }
+            }
+            
         });
     };
 

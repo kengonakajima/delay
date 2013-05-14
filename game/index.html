@@ -30,13 +30,32 @@
     </select>
     <script type="text/javascript">
     $("#fps").change( function() {
-        var str = "";
         $("select option:selected").each(function () {
           game.setFPS( parseInt( $(this).text() ) );
       });
     });      
     </script>
 
+    最小遅延:
+    <select id="delay_min">
+    <option value="0">0ms(ローカル)</option>
+    <option value="10">10ms(東京-東京)</option>
+    <option value="20">20ms(東京-京都)</option>
+    <option value="30">30ms</option>
+    <option value="50">50ms(東京-東京 LTE)</option>
+    <option value="100">100ms(東京-Twitter)</option>
+    <option value="150">150ms</option>
+    <option value="200">200ms(東京-東京 3G)</option>
+    <option value="300">300ms(東京-London)</option>
+    <option value="500">500ms(東京-東欧ロシア)</option>
+    </select>
+    <script type="text/javascript">
+    $("#delay_min").change( function() {
+        $("select option:selected").each(function () {
+          game.setMinDelay( parseInt( $(this).text() ) / 1000.0 );
+      });
+    });      
+    </script>
 
 
 </body>
