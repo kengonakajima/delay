@@ -24,7 +24,9 @@ window.onload = function() {
     game.gravity = 50;
     game.accum_time = 0;
     game.rootScene.backgroundColor = '#ddd';
-        
+
+    game.score = 0;
+    
     var Bear = enchant.Class.create(enchant.Sprite, {
         initialize: function(x, y) {
             enchant.Sprite.call(this, 32, 32);
@@ -61,11 +63,32 @@ window.onload = function() {
         initialize: function(x,y) {
             Bear.call(this,x,y);
             this.addEventListener('enterframe', function() {
-                
+                var vx = 0;
+                if( game.input.right ) {
+                    vx = 200;
+                } else if( game.input.left ) {
+                    vx = -200;
+                }
+                this.x += vx * game.dt;
+
+                for(var i=0;i<game.n_crystals;i++){
+                    var c = game.crystals[i];
+                    if( c && c.x >= this.x - 16 && c.x <= this.x + 16 && c.y >= this.y - 16 && c.y <= this.y + 16 ) {
+                        game.crystals[i] = null;
+                        c.parentNode.removeChild(c);
+                        game.score += c.bonus;
+                        $("#score").text("SCORE: " + game.score );
+                        break;
+                    }
+
+                }
+
 
             });
         }
     });
+    game.n_crystals = 200;
+    game.crystals = new Array(game.n_crystals);
     var Crystal  = enchant.Class.create( enchant.Sprite, {
         initialize: function() {
             enchant.Sprite.call(this,16,16);            
@@ -85,13 +108,28 @@ window.onload = function() {
             this.bonus = 1;
             if( rand(100)%5==0) {
                 this.scale(2,2);
-                this.bonus *= 4;
+                this.bonus *= 20;
             }
             this.addEventListener( 'enterframe', function() {
                 this.x += this.vx * game.dt;
                 this.y += this.vy * game.dt;
                 this.vy += game.gravity * game.dt;
+                if( this.y > scrh ) {
+                    for(var i=0;i<game.n_crystals;i++){
+                        if( game.crystals[i] == this ) {
+                            game.crystals[i] = null;
+                            break;
+                        }
+                    }
+                    this.parentNode.removeChild(this);
+                }
             });
+            for(var i=0;i< game.n_crystals; i++ ) {
+                if( game.crystals[i] == null ){
+                    game.crystals[i] = this;
+                    break;
+                }
+            }
             game.rootScene.addChild(this);            
         }
         
