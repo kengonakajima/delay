@@ -40,16 +40,16 @@ window.onload = function() {
         game.fps = fps;
         game.dt = 1.0 / fps; // TODO: 実測せよ
     }
-    game.setMinDelay = function(d) {        game.delay_min = d;     }
+    game.setMinDelay = function(d) {        game.delay_min = d;  }
     game.setMinDelay(0);
     game.setSpikeDelay = function(d) {        game.delay_spike = d; }
     game.setSpikeDelay(0);
-    
+    game.setGhost = function(flg) {  game.show_ghost = flg; }
     game.setFPS(60);
 
     game.gravity = 50;
     game.accum_time = 0;
-    game.rootScene.backgroundColor = '#ddd';
+    game.rootScene.backgroundColor = '#888';
 
     game.score = 0;
 
@@ -87,6 +87,17 @@ window.onload = function() {
                 this.x += this.vx * game.dt;
                 if( this.x < 0 ) this.x = 0;
                 if( this.x > scrw-32 ) this.x = scrw-32;
+            });
+        }
+    });
+
+    var Ghost = enchant.Class.create( PC, {
+        initialize: function(x,y) {
+            PC.call(this,x,y);
+            this.opacity = 0.2;
+
+            this.addEventListener('enterframe', function() {
+//                console.log("ghost: x:", this.x, this.vx );                
                 for(var i=0;i<game.n_crystals;i++){
                     var c = game.crystals[i];
                     if( c && c.x >= this.x - c.hitsize && c.x <= this.x + c.hitsize &&
@@ -98,13 +109,13 @@ window.onload = function() {
                         $("#score").text("SCORE: " + game.score );
                         break;
                     }
-
                 }
-
-
             });
         }
     });
+    
+
+    
     game.n_crystals = 200;
     game.crystals = new Array(game.n_crystals);
     var Crystal  = enchant.Class.create( enchant.Sprite, {
@@ -164,6 +175,7 @@ window.onload = function() {
 
     game.onload = function() {
         game.pc = new PC( scrw/2, scrh-64 );
+        game.ghost = new Ghost( scrw/2, scrh-64 );
         game.last_crystal = 0;
         game.rootScene.addEventListener('enterframe', function() {
             game.accum_time += game.dt;
@@ -181,13 +193,17 @@ window.onload = function() {
                 game.spike_at = game.accum_time + range(0.5,3);
             }
 
+            var base_vx = 200;
             if( game.input.right ) {
                 queue.enqueue( DelayedEvent( "right", game.accum_time + delay ) );
+                game.pc.setVX(base_vx);
             } else if( game.input.left) {
                 queue.enqueue( DelayedEvent( "left", game.accum_time + delay ) );
+                game.pc.setVX(-base_vx);                
             } else {
                 if( game.pc.vx != 0 ) {
                     queue.enqueue( DelayedEvent( "stop", game.accum_time + delay ) );
+                    game.pc.setVX(0);
                 }
             }
 
@@ -197,11 +213,11 @@ window.onload = function() {
             if( top != null && game.accum_time >= top.fire_at ) {
                 queue.dequeue();
                 if(top.name == "right") {
-                    game.pc.setVX(200);                    
+                    game.ghost.setVX(base_vx);                    
                 } else if( top.name == "left" ) {
-                    game.pc.setVX(-200);
+                    game.ghost.setVX(-base_vx);
                 } else if( top.name == "stop" ) {
-                    game.pc.setVX(0);
+                    game.ghost.setVX(0);
                 }
             }
             

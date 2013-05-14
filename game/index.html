@@ -30,7 +30,7 @@
     </select>
     <script type="text/javascript">
     $("#fps").change( function() {
-        $("select option:selected").each(function () {
+        $("#fps option:selected").each(function () {
           game.setFPS( parseInt( $(this).text() ) );
       });
     });      
@@ -51,7 +51,7 @@
     </select>
     <script type="text/javascript">
     $("#delay_min").change( function() {
-        $("select option:selected").each(function () {
+        $("#delay_min option:selected").each(function () {
           game.setMinDelay( parseInt( $(this).text() ) / 1000.0 );
       });
     });      
@@ -69,12 +69,26 @@
     </select>
     <script type="text/javascript">
     $("#delay_spike").change( function() {
-        $("select option:selected").each(function () {
+        $("#delay_spike option:selected").each(function () {
           game.setSpikeDelay( parseInt( $(this).text() ) / 1000.0 );
       });
     });      
-    </script>    
+    </script>
 
+    <br>
+    
+    ゴースト表示:
+    <select id="delay_spike">
+    <option value="1">ON</option>
+    <option value="0">OFF</option>
+    </select>
+    <script type="text/javascript">
+    $("#ghost").change( function() {
+        $("#ghost option:selected").each(function () {
+          game.setGhost( parseInt( $(this).text() ) );
+      });
+    });      
+    </script>
 
 </body>
 </html>
