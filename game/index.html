@@ -95,7 +95,21 @@
     $("#sync").click( function() {
         game.sync();
     });      
-    </script>    
+    </script>
+
+    ローカル判定:
+    <select id="localhit">
+    <option value="0">OFF</option>
+    <option value="1">ON</option>
+    </select>
+    <script type="text/javascript">
+    $("#localhit").change( function() {
+        $("#localhit option:selected").each(function () {
+          game.setLocalHit( $(this).text() == "ON" );
+        });    
+    });      
+    </script>
+    
 </body>
 </html>
 

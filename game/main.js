@@ -29,6 +29,23 @@ function DelayedEvent( name, fire_at ) {
     return e;
 }
 
+function checkGetCrystal( x, y ) {
+    for(var i=0;i<game.n_crystals;i++){
+        var c = game.crystals[i];
+        if( c && c.x >= x - c.hitsize && c.x <= x + c.hitsize &&
+            c.y >= y - c.hitsize && c.y <= y + c.hitsize ) {
+            game.crystals[i] = null;
+            c.parentNode.removeChild(c);
+            game.score += c.bonus;
+            c.playBonusSound();
+            $("#score").text("SCORE: " + game.score );
+            break;
+        }
+    }
+}
+
+
+
 window.onload = function() {
     game = new Game(scrw, scrh);
 
@@ -46,6 +63,8 @@ window.onload = function() {
     game.setSpikeDelay(0);
     game.setGhost = function(flg) {  game.show_ghost = flg; }
     game.setGhost(true);
+    game.setLocalHit = function(flg) { game.local_hit = flg; }
+    game.setLocalHit(false);
     game.setFPS(60);
 
     game.gravity = 50;
@@ -98,19 +117,7 @@ window.onload = function() {
             this.opacity = 0.2;
 
             this.addEventListener('enterframe', function() {
-//                console.log("ghost: x:", this.x, this.vx );                
-                for(var i=0;i<game.n_crystals;i++){
-                    var c = game.crystals[i];
-                    if( c && c.x >= this.x - c.hitsize && c.x <= this.x + c.hitsize &&
-                        c.y >= this.y - c.hitsize && c.y <= this.y + c.hitsize ) {
-                        game.crystals[i] = null;
-                        c.parentNode.removeChild(c);
-                        game.score += c.bonus;
-                        c.playBonusSound();
-                        $("#score").text("SCORE: " + game.score );
-                        break;
-                    }
-                }
+                checkGetCrystal( this.x, this.y );
             });
         }
     });
@@ -231,6 +238,13 @@ window.onload = function() {
             } else {
                 game.ghost.opacity = 0;
             }
+
+            // ローカルヒット
+            if( game.local_hit ) {
+                checkGetCrystal( game.pc.x, game.pc.y );
+            }
+
+            
         });
     };
 
