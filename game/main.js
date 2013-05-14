@@ -21,8 +21,8 @@ window.onload = function() {
     
     game.setFPS(60);
 
-    game.gravity = 10;
-
+    game.gravity = 50;
+    game.accum_time = 0;
     game.rootScene.backgroundColor = '#ddd';
         
     var Bear = enchant.Class.create(enchant.Sprite, {
@@ -57,10 +57,13 @@ window.onload = function() {
         }
     });
 
-    var PC = enchant.Class.create( enchant.Sprite, {
+    var PC = enchant.Class.create( Bear, {
         initialize: function(x,y) {
             Bear.call(this,x,y);
+            this.addEventListener('enterframe', function() {
+                
 
+            });
         }
     });
     var Crystal  = enchant.Class.create( enchant.Sprite, {
@@ -68,12 +71,12 @@ window.onload = function() {
             enchant.Sprite.call(this,16,16);            
             this.vy = range(-10,-5);
             this.y = rand(scrh/2,scrh);
+            this.vx = range(40,200);                            
             if( (rand(100) % 2) == 0 ) { // right
                 this.x = scrw;
-                this.vx = range(-5,-2);            
+                this.vx *= -1;
             } else { // left
                 this.x = 0;
-                this.vx = range(2,5);                            
             }
 
             this.image = game.assets["enchant_pics.png"];
@@ -85,8 +88,8 @@ window.onload = function() {
                 this.bonus *= 4;
             }
             this.addEventListener( 'enterframe', function() {
-                this.x += this.vx;
-                this.y += this.vy;
+                this.x += this.vx * game.dt;
+                this.y += this.vy * game.dt;
                 this.vy += game.gravity * game.dt;
             });
             game.rootScene.addChild(this);            
@@ -95,12 +98,17 @@ window.onload = function() {
     });
 
     game.onload = function() {
+        var pc = new PC( scrw/2, scrh-64 );
+        game.last_crystal = 0;
         game.rootScene.addEventListener('enterframe', function() {
+            game.accum_time += game.dt;
+            
             var k = game.input.up;
-            if(this.age % 10 == 0 || k ){
-                // var enemy = new Enemy(0, rand(320));
+            if(game.accum_time > game.last_crystal + 0.1 ){
+                game.last_crystal = game.accum_time;
                 new Crystal();
             }
+
         });
     };
 
