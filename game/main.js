@@ -62,7 +62,7 @@ function checkGetCrystal( x, y, is_local ) {
 window.onload = function() {
     game = new Game(scrw, scrh);
 
-    game.preload('chara1.png', 'map0.png', "enchant_pics.png");
+    game.preload('chara1.png', 'map0.png', "deck.png");
     game.preload("get1.wav", "get2.wav", "explode.wav" );
 
     game.mobs = new Array(200);
@@ -104,18 +104,18 @@ window.onload = function() {
             game.rootScene.addChild(this);
         }
     });
-
-
-    var Treasure = enchant.Class.create(enchant.Sprite, {
-        initialize: function(x, y) {
-            enchant.Sprite.call(this, 16, 16);
+    var Arrow = enchant.Class.create( enchant.Sprite, {
+        initialize: function(x,y,is_right) {
+            enchant.Sprite.call(this,16,16);
             this.x = x;
             this.y = y;
-            this.image = game.assets['map0.png'];
-            this.frame = 0;
+            this.scale(4,4);
+            this.image = game.assets["deck.png"];
+            if( is_right ) this.frame = 71; else this.frame = 72;
             game.rootScene.addChild(this);
         }
     });
+
 
     var PC = enchant.Class.create( Bear, {
         initialize: function(x,y) {
@@ -172,7 +172,7 @@ window.onload = function() {
                 this.x = 0;
             }
 
-            this.image = game.assets["enchant_pics.png"];
+            this.image = game.assets["deck.png"];
             this.frame = irange(64,66+1);
 
             
@@ -245,6 +245,14 @@ window.onload = function() {
         game.pc = new PC( scrw/2, scrh-64 );
         game.ghost = new Ghost( scrw/2, scrh-64 );
         game.last_crystal = 0;
+
+        // pad..
+        var left_arrow = new Arrow( 0,scrh-64, false );
+        left_arrow.opacity = 0;
+        var right_arrow = new Arrow( 0,scrh-64, true );
+        right_arrow.opacity = 0;        
+        
+        //
         game.rootScene.addEventListener('enterframe', function() {
             game.accum_time += game.dt;
             
@@ -270,6 +278,15 @@ window.onload = function() {
                     game.pc.setVX(0);
                 }
             }
+            if( game.input.right ) right_arrow.opacity = 1; else right_arrow.opacity = 0;
+            if( game.input.left ) left_arrow.opacity = 1; else left_arrow.opacity = 0;
+            var maxcharx = game.pc.x;
+            if( game.ghost.x > maxcharx ) maxcharx = game.ghost.x;
+            var mincharx = game.pc.x;
+            if( game.ghost.x < mincharx ) mincharx = game.ghost.x;
+            right_arrow.x = maxcharx + 150;
+            left_arrow.x = mincharx - 150;
+
 
 
             // イベント消化
