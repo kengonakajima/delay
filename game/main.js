@@ -13,6 +13,7 @@ window.onload = function() {
     game = new Game(scrw, scrh);
     game.enemy_speed = 1;
     game.preload('chara1.png', 'map0.png', "enchant_pics.png");
+    game.preload("get1.wav", "get2.wav" );
 
     game.setFPS = function(fps) {
         game.fps = fps;
@@ -73,10 +74,12 @@ window.onload = function() {
 
                 for(var i=0;i<game.n_crystals;i++){
                     var c = game.crystals[i];
-                    if( c && c.x >= this.x - 16 && c.x <= this.x + 16 && c.y >= this.y - 16 && c.y <= this.y + 16 ) {
+                    if( c && c.x >= this.x - c.hitsize && c.x <= this.x + c.hitsize &&
+                        c.y >= this.y - c.hitsize && c.y <= this.y + c.hitsize ) {
                         game.crystals[i] = null;
                         c.parentNode.removeChild(c);
                         game.score += c.bonus;
+                        c.playBonusSound();
                         $("#score").text("SCORE: " + game.score );
                         break;
                     }
@@ -106,9 +109,18 @@ window.onload = function() {
             this.frame = range(64,66+1);
 
             this.bonus = 1;
+            this.hitsize = 16;
             if( rand(100)%5==0) {
                 this.scale(2,2);
                 this.bonus *= 20;
+                this.hitsize = 32;
+            }
+            this.playBonusSound = function() {
+                if( this.bonus == 1 ) {
+                    game.assets['get1.wav'].play();
+                } else {
+                    game.assets['get2.wav'].play();
+                }
             }
             this.addEventListener( 'enterframe', function() {
                 this.x += this.vx * game.dt;
