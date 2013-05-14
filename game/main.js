@@ -36,9 +36,14 @@ function checkGetCrystal( x, y ) {
             c.y >= y - c.hitsize && c.y <= y + 16 + c.hitsize ) {
             game.mobs[i] = null;
             c.parentNode.removeChild(c);
-            game.score += c.bonus;
-            c.playBonusSound();
-            $("#score").text("SCORE: " + game.score );
+            if( c.bonus > 0 ) {
+                game.score += c.bonus;
+                c.playBonusSound();
+            } else {
+                game.assets['explode.wav'].play();                
+                game.score = 0;
+             }
+            $("#score").text("SCORE: " + game.score );            
             break;
         }
     }
@@ -50,7 +55,7 @@ window.onload = function() {
     game = new Game(scrw, scrh);
 
     game.preload('chara1.png', 'map0.png', "enchant_pics.png");
-    game.preload("get1.wav", "get2.wav" );
+    game.preload("get1.wav", "get2.wav", "explode.wav" );
 
     game.mobs = new Array(200);
     
@@ -141,12 +146,18 @@ window.onload = function() {
             this.image = game.assets["enchant_pics.png"];
             this.frame = irange(64,66+1);
 
+            
             this.bonus = 1;
             this.hitsize = 16;
             if( irange(0,100)%5==0) {
                 this.scale(2,2);
                 this.bonus *= 20;
                 this.hitsize = 32;
+            }
+            if( irange(0,100)%11 == 0  ) { // 爆弾
+                this.hitsize /= 2;
+                this.bonus = -1;
+                this.frame = 16+9;
             }
             this.playBonusSound = function() {
                 if( this.bonus == 1 ) {
